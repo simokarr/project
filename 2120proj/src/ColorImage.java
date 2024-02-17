@@ -11,6 +11,7 @@ public class ColorImage {
     public BufferedImage image;
 
     public ColorImage(String filename) throws IOException {
+
         this.image = ImageIO.read(new File(filename));
         this.width=image.getWidth();
         this.height= image.getHeight();
@@ -41,24 +42,20 @@ public class ColorImage {
 
     }
     public void reduceColor(int d) {
-        // Since d is fixed at 3 bits for this scenario
-        int maxValue = (1 << d) - 1; // 7, since 2^3 - 1 = 7
-        double scale = 255.0 / maxValue; // Scale factor to map original color to 3-bit color
+        int shift = 8 - d;
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 int originalColor = image.getRGB(i, j);
                 int alpha = (originalColor >> 24) & 0xFF; // Preserve the alpha channel
 
-                int[] colors = getPixel(i, j); // Extract the original RGB values
-
-                // Quantize each color component to 3 bits
-                colors[0] = (int)(((colors[0] / scale) + 0.5) * scale); // Red
-                colors[1] = (int)(((colors[1] / scale) + 0.5) * scale); // Green
-                colors[2] = (int)(((colors[2] / scale) + 0.5) * scale); // Blue
+                // Shift the color values right by (8 - d) bits
+                int red = ((originalColor >> 16) & 0xFF) >> shift;
+                int green = ((originalColor >> 8) & 0xFF) >> shift;
+                int blue = (originalColor & 0xFF) >> shift;
 
                 // Reassemble the pixel with the reduced color and set it back to the image
-                int newColor = (alpha << 24) | (colors[0] << 16) | (colors[1] << 8) | colors[2];
+                int newColor = (alpha << 24) | (red << 16) | (green << 8) | blue;
                 image.setRGB(i, j, newColor);
             }
         }
