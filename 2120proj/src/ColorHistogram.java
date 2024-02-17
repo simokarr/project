@@ -1,6 +1,5 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.StringTokenizer;
 
 public class ColorHistogram {
 
@@ -11,29 +10,24 @@ public class ColorHistogram {
     // Constructor for creating a histogram with a specified bit depth
     public ColorHistogram(int d) {
         this.d = d;
-        int binCount = (int) Math.pow(2, 3 * d); // 2^(3 * d) bins for RGB color histogram
+        int binCount = (int) Math.pow(2, d * 3); // 2^(3 * d) bins for RGB color histogram
         histogram = new double[binCount];
     }
 
     // Constructor to create a histogram from a text file
-    public ColorHistogram(String filename) {
-        this.d = 3; // Assuming all histograms are for 3-bit color depth images
-        int binCount = (int) Math.pow(2, 3 * d);
-        histogram = new double[binCount];
-
+    public ColorHistogram(String filename) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            String line = br.readLine(); // Read the first line of the file
-            if (line != null) {
-                String[] values = line.split(" "); // Split the line into individual numbers
-                for (int i = 0; i < values.length && i < binCount; i++) {
-                    histogram[i] = Double.parseDouble(values[i]); // Parse each number as a double
-                }
+            String line = br.readLine(); // Read the first line
+            String[] values = line.split(" "); // Split the line into tokens
+
+            // The first value is the number of bins, which we can ignore for now
+            // The rest of the values are the histogram data
+            histogram = new double[values.length - 1];
+            for (int i = 1; i < values.length; i++) {
+                histogram[i - 1] = Double.parseDouble(values[i]);
             }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error reading histogram file: " + e.getMessage());
         }
     }
-
 
     // Sets a new image and computes its histogram
     public void setImage(ColorImage image) {
@@ -45,7 +39,7 @@ public class ColorHistogram {
     private void computeHistogram() {
         int width = image.getWidth();
         int height = image.getHeight();
-        int binCount = (int) Math.pow(2, 3 * d);
+        int binCount = (int) Math.pow(2, d * 3);
 
         // Reset histogram
         for (int i = 0; i < binCount; i++) {
@@ -85,6 +79,7 @@ public class ColorHistogram {
         for (int i = 0; i < histogram.length; i++) {
             intersection += Math.min(histogram[i], other.histogram[i]);
         }
+
         return intersection;
     }
 }
