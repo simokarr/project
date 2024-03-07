@@ -1,3 +1,13 @@
+/*
+CSI 2120
+Project - Part 1
+
+Group:
+Samih Karroum - 300188957
+Fuad Thabet - 300255031
+*/
+
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
